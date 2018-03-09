@@ -106,7 +106,9 @@ def master():
 		# uses regex to get naics code from specific website
 		naics_code = call_url(biz_url)
 		
-		
+		sheet.cell(row = row_iter, column = 2, value = naics_code)
+	
+	wb.save('biz_coded.xlsx')
 			
 master()
 		
