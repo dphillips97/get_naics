@@ -39,7 +39,7 @@ def get_url(results_links):
 	
 	for link in results_links:
 		
-		# returns a string but I don't totally get this
+		# returns a string using a BS method
 		url = link.get('href')
 		
 		# make regex object to find first(?) url that contains MI zip code 
@@ -74,18 +74,20 @@ def call_url(biz_url):
 	
 	
 	soup_2 = BeautifulSoup(biz_page_doc, 'html.parser')
-	naics_a = soup_2.find_all('a', attrs={'class':{'request-url'}})
+	naics_a = soup_2.find_all('a')
 	
 	for elem in naics_a:
 		
 		elem_doc = elem.text
-		elem_regex = r'\d{6}'
+		elem_regex = r'^\s(\d{6})\s-\s(.*)'
 		
 		try:
 		
 			mo = re.search(elem_regex, elem_doc)
-			return mo.group()
+			code = mo.group(1)
+			descr = mo.group(2)
 			
+			return code, descr
 		except:
 			
 			pass
@@ -94,6 +96,10 @@ def call_url(biz_url):
 def master():
 	wb = openpyxl.load_workbook('biz.xlsx')
 	sheet = wb.active
+	
+	# create headers
+	sheet.cell(row = 1, column = 2, value = 'naics code')
+	sheet.cell(row = 1, column = 3, value = 'description')
 	
 	#loop through rows to get biz name
 	for row_iter in range(2, sheet.max_row + 1):
@@ -113,11 +119,12 @@ def master():
 		if biz_url is not None:
 		
 			# uses regex to get naics code from specific website
-			naics_code = call_url(biz_url)
+			code, descr = call_url(biz_url)
 			
-			print(' %s' % str(naics_code))
+			print(' %s - %s' % (str(code), descr))
 			
-			sheet.cell(row = row_iter, column = 2, value = naics_code)
+			sheet.cell(row = row_iter, column = 2, value = code)
+			sheet.cell(row = row_iter, column = 3, value = descr)
 		
 			# rest for a moment to avoid battering their servers
 			time.sleep(5)
