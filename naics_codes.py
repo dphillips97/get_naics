@@ -1,6 +1,6 @@
 naics_dict = {
 				11: 'Agriculture, Forestry, Fishing and Hunting',
-				21: 'Mining, Quarrying, and Oil and Gas Extraction'
+				21: 'Mining, Quarrying, and Oil and Gas Extraction',
 				22: 'Utilities',
 				23: 'Construction',
 				31: 'Manufacturing',
@@ -20,9 +20,9 @@ naics_dict = {
 				61: 'Educational Services',
 				62: 'Health Care and Social Assistance',
 				71: 'Arts, Entertainment, and Recreation',
-				72: 'Accomodation and Food Services'
+				72: 'Accomodation and Food Services',
 				81: 'Other Services (except Public Administration)',
 				92: 'Public Administration'
-				{
+				}
 				
 				
