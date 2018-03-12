@@ -15,7 +15,7 @@ on the results_page will be the business in Madison Heights/MI.
 # biz_name is from spreadsheet
 def get_site(biz_name):
 	
-	search_url = r'https://siccode.com/en/search/' + biz_name
+	search_url = r'https://siccode.com/en/business-list/' + biz_name
 	
 	# get page object, save as string
 	results_page = requests.get(search_url)
@@ -43,12 +43,12 @@ def get_url(results_links):
 		url = link.get('href')
 		
 		# make regex object to find first(?) url that contains MI zip code 
-		url_regex = re.compile(r'.*480\d\d')
+		url_regex = r'.*48\d\d\d'
 		
 		try:
 			
 			# create match object
-			mo = url_regex.search(url)
+			mo = re.search(url_regex, url)
 			
 			# url string that points to business-specific page
 			biz_url = mo.group()
@@ -97,15 +97,17 @@ def master():
 	wb = openpyxl.load_workbook('biz.xlsx')
 	sheet = wb.active
 	
+	max_col = sheet.max_column
+	
 	# create headers
-	sheet.cell(row = 1, column = 2, value = 'naics code')
-	sheet.cell(row = 1, column = 3, value = 'description')
+	sheet.cell(row = 1, column = max_col + 1, value = 'naics code')
+	sheet.cell(row = 1, column = max_col + 2, value = 'description')
 	
 	#loop through rows to get biz name
 	for row_iter in range(2, sheet.max_row + 1):
 		
 		# get business names from Excel
-		biz_name = sheet.cell(row = row_iter, column = 1).value
+		biz_name = sheet.cell(row = row_iter, column = 5).value
 		
 		# print record being looked up and print result on same line
 		print('Looking up code for %s...' % (biz_name), end = '');
@@ -116,26 +118,32 @@ def master():
 		# returns url segment specific to MI business 
 		biz_url = get_url(results_links)
 		
-		if biz_url is not None:
+		try:
 		
 			# uses regex to get naics code from specific website
 			code, descr = call_url(biz_url)
 			
 			print(' %s - %s' % (str(code), descr))
 			
-			sheet.cell(row = row_iter, column = 2, value = code)
-			sheet.cell(row = row_iter, column = 3, value = descr)
+			sheet.cell(row = row_iter, column = max_col + 1, value = code)
+			sheet.cell(row = row_iter, column = max_col + 2, value = descr)
 		
 			# rest for a moment to avoid battering their servers
 			time.sleep(5)
 		
-		# if biz_url is NoneType
-		else:
+		# if biz_url is Null
+		except:
 			
-			sheet.cell(row = row_iter, column = 2, value = 'NOT FOUND')
+			sheet.cell(row = row_iter, column = max_col + 1, value = 'NOT FOUND')
 			
 			print(' %s' % 'NOT FOUND')
+		
+		
+		# save temp file every 50 records
+		if (row_iter % 101 == 0):
 			
+			wb.save('biz_temp_%i.xlsx' % (row_iter-1))
+		
 	wb.save('biz_coded.xlsx')
 			
 master()
